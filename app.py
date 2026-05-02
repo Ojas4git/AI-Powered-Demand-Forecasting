@@ -1,0 +1,117 @@
+import streamlit as st
+import pickle
+import pandas as pd
+import os
+import gdown
+
+st.set_page_config(page_title="Demand Forecasting", layout="wide")
+st.title("📈 AI-Powered Demand Forecasting")
+st.markdown("---")
+
+# ------------------- GOOGLE DRIVE FILE ID (model only) -------------------
+MODEL_FILE_ID = "1o9cR3k5sFB8yEn1ZBH7RX_dWi7vPlWnQ"   # ← paste your model_forecast.pkl file ID here
+MODEL_PATH    = "model_forecast.pkl"
+
+# ------------------- LOAD MODEL & COLUMNS -------------------
+@st.cache_resource
+def load_model_and_columns():
+    # Download model from Google Drive if not already present
+    if not os.path.exists(MODEL_PATH):
+        with st.spinner("Downloading model... please wait ⏳"):
+            gdown.download(
+                f"https://drive.google.com/uc?id={MODEL_FILE_ID}",
+                MODEL_PATH, quiet=False
+            )
+
+    if not os.path.exists(MODEL_PATH):
+        st.error("Model download failed. Check your Google Drive file ID and sharing settings.")
+        st.stop()
+
+    # forecast_columns.pkl is committed directly in the repo
+    if not os.path.exists("forecast_columns.pkl"):
+        st.error("forecast_columns.pkl not found in the repo.")
+        st.stop()
+
+    model   = pickle.load(open(MODEL_PATH, "rb"))
+    columns = pickle.load(open("forecast_columns.pkl", "rb"))
+    return model, columns
+
+model, columns = load_model_and_columns()
+
+# ------------------- INPUT SECTION -------------------
+st.subheader("Enter Input Features")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    store     = st.number_input("Store ID", value=1, min_value=1)
+    item      = st.number_input("Item ID", value=101, min_value=1)
+    promotion = st.selectbox("Promotion", [0, 1])
+    holiday   = st.selectbox("Holiday", [0, 1])
+    temp      = st.number_input("Temperature", value=30.0)
+    fuel      = st.number_input("Fuel Price", value=3.5)
+
+with col2:
+    month = st.slider("Month", 1, 12, 1)
+    day   = st.slider("Day", 1, 31, 1)
+    dow   = st.slider("Day of Week (0=Mon)", 0, 6, 1)
+    week  = st.slider("Week of Year", 1, 52, 1)
+
+st.subheader("Lag Features")
+lag1     = st.number_input("Yesterday Sales (Lag_1)", value=50.0)
+lag7     = st.number_input("Last Week Sales (Lag_7)", value=50.0)
+rolling7 = st.number_input("7-day Avg Sales", value=50.0)
+
+region = st.selectbox("Region", ["North", "South", "East", "West"])
+
+# ------------------- PREDICTION -------------------
+if st.button("Predict Sales"):
+    input_dict = {
+        'Store_ID':       store,
+        'Item_ID':        item,
+        'Promotion':      promotion,
+        'Holiday':        holiday,
+        'Temperature':    temp,
+        'Fuel_Price':     fuel,
+        'Month':          month,
+        'Day':            day,
+        'Day_of_Week':    dow,
+        'Week_of_Year':   week,
+        'Lag_1':          lag1,
+        'Lag_7':          lag7,
+        'Rolling_Mean_7': rolling7
+    }
+
+    for col in columns:
+        if col.startswith('Region_'):
+            input_dict[col] = 1 if col == f"Region_{region}" else 0
+
+    input_df = pd.DataFrame([input_dict])
+    input_df = input_df.reindex(columns=columns, fill_value=0)
+
+    prediction = model.predict(input_df)[0]
+    st.success(f"📊 Predicted Sales: {prediction:.2f}")
+
+    chart_data = pd.DataFrame({
+        "Metric": ["Lag_1", "Lag_7", "Rolling Avg", "Prediction"],
+        "Value":  [lag1, lag7, rolling7, prediction]
+    })
+    st.bar_chart(chart_data.set_index("Metric"))
+
+# ------------------- BATCH PREDICTION -------------------
+st.markdown("---")
+st.subheader("📂 Batch Prediction")
+
+file = st.file_uploader("Upload CSV", type=["csv"])
+
+if file is not None:
+    data = pd.read_csv(file)
+    data = data.reindex(columns=columns, fill_value=0)
+
+    preds = model.predict(data)
+    data['Predicted_Sales'] = preds
+
+    st.write(data.head())
+
+    csv = data.to_csv(index=False).encode('utf-8')
+    st.download_button("Download Results", csv, "forecast_results.csv")
