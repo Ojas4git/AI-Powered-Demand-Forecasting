@@ -88,15 +88,6 @@ The ML model (`model_forecast.pkl`) is hosted on Google Drive and downloaded aut
 
 ---
 
-## 📸 Screenshot
-
-![App Screenshot](https://i.imgur.com/placeholder.png)
-> *Replace this with an actual screenshot of your app*
-
----
-
-## 👤 Author
-
 **Ojas** — [GitHub](https://github.com/Ojas4git)
 
 ---
