@@ -1,97 +1,170 @@
-# 📈 AI-Powered Demand Forecasting
+# 📈 AI-Powered Demand Forecasting System
 
-A machine learning web application that predicts product sales demand based on store, item, promotional, and temporal features.
-
-🔗 **Live App:** [https://ai-powered-demand-forecasting.streamlit.app](https://ai-powered-demand-forecasting.streamlit.app)
+🔗 **Live Application:** https://ai-powered-demand-forecasting.streamlit.app
 
 ---
 
-## 🚀 Features
+## 📌 Project Overview
 
-- **Single Prediction** — Enter store/item details and get instant sales forecast
-- **Batch Prediction** — Upload a CSV file and download results with predicted sales
-- **Interactive Chart** — Visual comparison of lag features vs predicted sales
-- **Region Support** — North, South, East, West one-hot encoding
-- **Auto Model Download** — Model loads from Google Drive on first run
+This project presents an **end-to-end Machine Learning system** designed to predict product demand across retail stores using historical sales data, temporal features, and external factors.
+
+The application enables businesses to **forecast future demand**, optimize inventory planning, and reduce operational inefficiencies.
 
 ---
 
-## 🛠️ Tech Stack
+## 🎯 Business Problem
 
-| Tool | Purpose |
-|------|---------|
-| Python | Core language |
-| Scikit-learn | ML model (Random Forest / Gradient Boosting) |
-| Streamlit | Web app framework |
-| Pandas | Data processing |
-| gdown | Google Drive model download |
+Accurate demand forecasting is critical for:
+
+* Preventing **stockouts and overstocking**
+* Improving **inventory and supply chain efficiency**
+* Reducing **operational costs**
+* Enhancing **customer satisfaction**
+
+This project aims to provide **data-driven demand predictions** using machine learning.
+
+---
+
+## ⚙️ Tech Stack
+
+| Tool          | Purpose                    |
+| ------------- | -------------------------- |
+| Python        | Core programming language  |
+| Pandas, NumPy | Data processing            |
+| Scikit-learn  | Machine learning models    |
+| Streamlit     | Web application deployment |
+| gdown         | Model hosting & retrieval  |
+| Git & GitHub  | Version control            |
 
 ---
 
 ## 📊 Input Features
 
-| Feature | Description |
-|---------|-------------|
-| Store ID | Unique store identifier |
-| Item ID | Unique product identifier |
-| Promotion | Whether promotion is active (0/1) |
-| Holiday | Whether it's a holiday (0/1) |
-| Temperature | Current temperature |
-| Fuel Price | Current fuel price |
-| Month | Month of the year (1-12) |
-| Day | Day of the month (1-31) |
-| Day of Week | 0 = Monday, 6 = Sunday |
-| Week of Year | Week number (1-52) |
-| Lag_1 | Yesterday's sales |
-| Lag_7 | Sales from 7 days ago |
-| Rolling Mean 7 | 7-day average sales |
-| Region | North / South / East / West |
+The model uses a combination of **categorical, numerical, and time-series features**:
+
+* Store_ID, Item_ID
+* Promotion, Holiday
+* Temperature, Fuel Price
+* Month, Day, Day_of_Week, Week_of_Year
+* Lag_1 (Previous day sales)
+* Lag_7 (Previous week sales)
+* Rolling_Mean_7 (7-day average demand)
+* Region (One-hot encoded)
 
 ---
 
-## 📂 Project Structure
+## 🧠 Machine Learning Approach
 
-```
-AI-Powered-Demand-Forecasting/
-├── app.py                            # Streamlit web app
-├── requirements.txt                  # Python dependencies
-├── forecast_columns.pkl              # Feature column names
-├── demand_forecasting.csv            # Training dataset
-└── ai_powered_demand_forecasting.ipynb  # Model training notebook
-```
+### 1. Data Preprocessing
+
+* Converted date features into time-based variables
+* Applied **binary encoding** for Promotion & Holiday
+* Used **one-hot encoding** for Region
+* Ensured consistent feature alignment for model training
 
 ---
 
-## ⚙️ Run Locally
+### 2. Feature Engineering (Key Highlight)
+
+To capture temporal patterns, the following features were engineered:
+
+* **Lag Features:**
+
+  * Lag_1 → Previous day demand
+  * Lag_7 → Weekly pattern
+
+* **Rolling Features:**
+
+  * 7-day moving average
+
+These features are critical for **time-series forecasting in real-world systems**.
+
+---
+
+### 3. Model Development
+
+Models implemented:
+
+* **Random Forest (Selected Model)**
+* **XGBoost (Benchmark Model)**
+
+👉 Random Forest was selected based on better performance on evaluation metrics.
+
+---
+
+### 4. Model Evaluation
+
+Metrics used:
+
+* Mean Absolute Error (MAE)
+* Root Mean Squared Error (RMSE)
+* R² Score
+
+> Insight: Model performance was limited due to synthetic dataset characteristics, highlighting the importance of data quality in forecasting tasks.
+
+---
+
+## 🚀 Deployment
+
+The model is deployed using **Streamlit Cloud** with the following capabilities:
+
+* 🔮 Real-time demand prediction
+* 📂 Batch prediction via CSV upload
+* 📊 Interactive visualization of inputs vs predictions
+* ☁️ Automatic model download from Google Drive
+
+---
+
+## 💻 How to Run Locally
 
 ```bash
-# 1. Clone the repo
+# Clone repository
 git clone https://github.com/Ojas4git/AI-Powered-Demand-Forecasting.git
 cd AI-Powered-Demand-Forecasting
 
-# 2. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# 3. Add your model file
-# Place model_forecast.pkl in the project folder
+# Add model file manually (for local run)
+# Place model_forecast.pkl in project folder
 
-# 4. Run the app
+# Run application
 streamlit run app.py
 ```
 
 ---
 
-## 🌐 Deployment
+## 📂 Project Structure
 
-This app is deployed on **Streamlit Cloud**.
-The ML model (`model_forecast.pkl`) is hosted on Google Drive and downloaded automatically at runtime using `gdown`.
+```bash
+AI-Powered-Demand-Forecasting/
+│
+├── app.py                              # Streamlit application
+├── requirements.txt                    # Dependencies
+├── forecast_columns.pkl                # Feature schema
+├── demand_forecasting.csv              # Dataset
+├── ai_powered_demand_forecasting.ipynb # Model training notebook
+```
 
 ---
 
-**Ojas** — [GitHub](https://github.com/Ojas4git)
+## 🔥 Key Highlights
+
+* End-to-end ML pipeline (EDA → Feature Engineering → Modeling → Deployment)
+* Implementation of **time-series feature engineering (lag & rolling features)**
+* Model comparison and selection (Random Forest vs XGBoost)
+* Fully deployed interactive application
+* Solved real-world deployment challenges (large model hosting)
 
 ---
 
-## 📄 License
+## 📈 Future Improvements
 
-This project is open source and available under the [MIT License](LICENSE).
+* Incorporate real-world datasets with stronger temporal patterns
+* Implement advanced models (LSTM, Prophet)
+* Add real-time data integration
+* Improve forecasting accuracy with hyperparameter tuning
+
+---
+
+n-source and available under the MIT License.
