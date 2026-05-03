@@ -167,4 +167,3 @@ AI-Powered-Demand-Forecasting/
 
 ---
 
-n-source and available under the MIT License.
